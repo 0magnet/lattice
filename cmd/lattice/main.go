@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/0magnet/lattice"
+	"golang.org/x/term"
 )
 
 func main() {
@@ -30,6 +31,38 @@ func main() {
 		}
 		os.Exit(1)
 	}
+}
+
+// readKeys reads the terminal a key at a time — raw, so a key arrives when it
+// is pressed and not when Enter is — and hands what it reads to the frame
+// loop, which alone touches the program. Nothing, when stdin is not a
+// terminal. restore puts the terminal back as it was, and has to be called
+// before the program exits, not left to a goroutine that may not get to run.
+func readKeys(ctx context.Context) (keys <-chan []byte, restore func()) {
+	ch := make(chan []byte)
+	fd := int(os.Stdin.Fd()) //nolint:gosec // a file descriptor fits an int
+	if !term.IsTerminal(fd) {
+		return ch, func() {}
+	}
+	old, err := term.MakeRaw(fd)
+	if err != nil {
+		return ch, func() {}
+	}
+	go func() {
+		buf := make([]byte, 256)
+		for {
+			n, err := os.Stdin.Read(buf)
+			if err != nil {
+				return
+			}
+			select {
+			case ch <- append([]byte(nil), buf[:n]...):
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return ch, func() { _ = term.Restore(fd, old) } //nolint:errcheck // the terminal is going away either way
 }
 
 func run(args []string) error {
@@ -46,6 +79,8 @@ func run(args []string) error {
 		return err
 	}
 	defer p.Leave() //nolint:errcheck // the terminal is going away either way
+	keys, restore := readKeys(ctx)
+	defer restore()
 	tick := time.NewTicker(p.Interval())
 	defer tick.Stop()
 	for {
@@ -55,6 +90,10 @@ func run(args []string) error {
 		select {
 		case <-ctx.Done():
 			return nil
+		case b := <-keys:
+			if p.Input(b) {
+				return nil
+			}
 		case <-tick.C:
 		}
 	}
