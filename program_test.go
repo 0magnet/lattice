@@ -106,3 +106,26 @@ func TestProgramFrameByFrame(t *testing.T) {
 		t.Errorf("sheet %+v", s)
 	}
 }
+
+// A solid that has not moved is not drawn again: with no spin, the second
+// frame renders nothing and sends nothing.
+func TestAStillSolidIsNotRedrawn(t *testing.T) {
+	p, err := NewProgram([]string{"-n", "8", "-spin", "0"}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out strings.Builder
+	if err := p.Enter(&out); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Frame(time.Unix(1, 0)); err != nil {
+		t.Fatal(err)
+	}
+	n := out.Len()
+	if err := p.Frame(time.Unix(500, 0)); err != nil {
+		t.Fatal(err)
+	}
+	if out.Len() != n || !p.drawn {
+		t.Errorf("a still solid was drawn again")
+	}
+}
