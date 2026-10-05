@@ -159,3 +159,53 @@ func TestTurned(t *testing.T) {
 		t.Error("a quarter turn did not bring it to either side")
 	}
 }
+
+// Render's corner slab finds the same voxels Lit does, and the three
+// families, each rendered on its own, light the same voxels: exactly, for
+// every shape, turned to an awkward angle.
+func TestTheFamiliesLightTheSameVoxels(t *testing.T) {
+	const n = 10
+	for _, name := range ShapeNames() {
+		s := Turned(Shapes[name], 0.7, 0.3)
+		lit := map[Axis]map[[3]int]bool{}
+		for _, a := range []Axis{X, Y, Z} {
+			lit[a] = map[[3]int]bool{}
+			for k := range n {
+				sh := Sheet{Axis: a, Slice: k, N: n}
+				f := Render(sh, s, Lines, Mono)
+				for v := range n {
+					for u := range n {
+						on := f.At(2*u, v).Ch != 0
+						if on != Lit(s, sh.Voxel(u, v), n) {
+							t.Fatalf("%s %v%d voxel %d,%d: slab %v, Lit %v", name, a, k, u, v, on, !on)
+						}
+						if on {
+							lit[a][sh.index(u, v)] = true
+						}
+					}
+				}
+			}
+		}
+		if len(lit[Z]) == 0 {
+			t.Errorf("%s: nothing lit", name)
+		}
+		for _, a := range []Axis{X, Y} {
+			if len(lit[a]) != len(lit[Z]) {
+				t.Errorf("%s: %v lights %d voxels, z %d", name, a, len(lit[a]), len(lit[Z]))
+			}
+			for i := range lit[Z] {
+				if !lit[a][i] {
+					t.Errorf("%s: voxel %v lit in z, not in %v", name, i, a)
+				}
+			}
+		}
+	}
+}
+
+func BenchmarkRender(b *testing.B) {
+	sh := Sheet{Axis: Z, Slice: 12, N: 24}
+	s := Turned(Shapes["torus"], 0.5, 0.3)
+	for b.Loop() {
+		Render(sh, s, Lines, ByPosition)
+	}
+}
