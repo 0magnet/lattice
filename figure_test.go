@@ -106,3 +106,18 @@ func cellsText(f Frame, r int) string {
 
 // epoch is a fixed moment, so a frame drawn twice stands the same way.
 var epoch = time.Unix(1_000_000_000, 0)
+
+// BenchmarkFigureVoxels is a trail's worth of short segments, voxelized as a
+// stack at 24 rows would.
+func BenchmarkFigureVoxels(b *testing.B) {
+	pts := make([]Vec3, 20000)
+	for i := range pts {
+		t := float64(i) / 300
+		pts[i] = Vec3{0.8 * math.Sin(t), 0.8 * math.Cos(1.3*t), 0.8 * math.Sin(0.7*t)}
+	}
+	f := new(Figure)
+	for b.Loop() {
+		f.Set([][]Vec3{pts})
+		f.voxels(24, turn{pose: Identity})
+	}
+}

@@ -75,22 +75,19 @@ func (f *Figure) voxels(n int, tu turn) *figGrid {
 		clear(g.dir)
 	}
 	place := tu.forward()
-	idx := func(p Vec3) (i [3]int, ok bool) {
-		for a := range 3 {
-			k := int(math.Floor((p[a] + 1) / 2 * float64(n)))
-			if k < 0 || k >= n {
-				return i, false
-			}
-			i[a] = k
-		}
-		return i, true
+	if tu == (turn{pose: Identity}) {
+		place = func(p Vec3) Vec3 { return p } // the usual case: a host that turns the stack itself
 	}
+	half := float64(n) / 2
 	mark := func(p, d Vec3) {
-		i, ok := idx(p)
-		if !ok {
-			return
+		var j int
+		for a := range 3 {
+			x := (p[a] + 1) * half // voxels from the low edge
+			if !(x >= 0) || x >= float64(n) {
+				return
+			}
+			j = j*n + int(x)
 		}
-		j := g.at(i)
 		g.lit[j] = true
 		// A line has a direction but no sense: one running back over the
 		// same voxel adds to it rather than canceling it.
@@ -100,20 +97,29 @@ func (f *Figure) voxels(n int, tu turn) *figGrid {
 		g.dir[j] = g.dir[j].Add(d)
 	}
 	for _, l := range f.lines {
+		if len(l) == 0 {
+			continue
+		}
+		a := place(l[0])
 		if len(l) == 1 {
-			mark(place(l[0]), Vec3{})
+			mark(a, Vec3{})
 			continue
 		}
 		for k := 1; k < len(l); k++ {
-			a, b := place(l[k-1]), place(l[k])
+			b := place(l[k])
 			d := b.Add(a.Scale(-1))
-			// Sampled at under half a voxel, so no voxel the segment crosses
-			// is stepped over.
-			steps := int(math.Ceil(d.Len()*float64(n))) + 1
+			// Sampled at no more than half a voxel apart, so no voxel the
+			// segment crosses is stepped over: a short segment, as most of a
+			// trail's are, is its far end alone.
+			steps := max(1, int(math.Ceil(d.Len()*half*2)))
 			steps = min(steps, 4*n) // a jump across the volume, not a line through it
-			for s := range steps + 1 {
+			if k == 1 {
+				mark(a, d)
+			}
+			for s := 1; s <= steps; s++ {
 				mark(a.Add(d.Scale(float64(s)/float64(steps))), d)
 			}
+			a = b
 		}
 	}
 	f.grid, f.gridGen, f.gridN, f.gridAs = g, f.gen, n, tu
