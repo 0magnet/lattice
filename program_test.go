@@ -164,3 +164,23 @@ func TestTheTerminalSetsTheResolution(t *testing.T) {
 		t.Errorf("-n 8 was resized to %d", r.Sheet().N)
 	}
 }
+
+// BenchmarkProgramFrame is one sheet's program drawing a turning solid, as a
+// stack at 24 rows runs 72 of.
+func BenchmarkProgramFrame(b *testing.B) {
+	p, err := NewProgram([]string{"-n", "24", "-axis", "z"}, io.Discard)
+	if err != nil {
+		b.Fatal(err)
+	}
+	if err := p.Enter(io.Discard); err != nil {
+		b.Fatal(err)
+	}
+	t := time.Unix(1_000_000_000, 0)
+	b.ReportAllocs()
+	for b.Loop() {
+		t = t.Add(50 * time.Millisecond)
+		if err := p.Frame(t); err != nil {
+			b.Fatal(err)
+		}
+	}
+}

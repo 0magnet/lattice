@@ -30,15 +30,15 @@ func TestFigureLineGlyphs(t *testing.T) {
 	f := new(Figure)
 	f.Set([][]Vec3{{{-0.9, 0.01, 0.01}, {0.9, 0.01, 0.01}}})
 	const n = 8
-	z := renderFigure(Sheet{Axis: Z, Slice: n / 2, N: n}, f, turn{pose: Identity}, Lines, Mono)
+	z := renderFigure(Sheet{Axis: Z, Slice: n / 2, N: n}, f, turn{pose: Identity}, Lines, Mono, nil)
 	if row := cellsText(z, n/2-1); !strings.Contains(row, "──────────") {
 		t.Errorf("z sheet row %d = %q, want a run of ─", n/2-1, row)
 	}
-	x := renderFigure(Sheet{Axis: X, Slice: n / 2, N: n}, f, turn{pose: Identity}, Lines, Mono)
+	x := renderFigure(Sheet{Axis: X, Slice: n / 2, N: n}, f, turn{pose: Identity}, Lines, Mono, nil)
 	if got := strings.Count(cellsText(x, n/2-1), "·"); got != 2 {
 		t.Errorf("x sheet: %d ·, want one voxel's two", got)
 	}
-	y := renderFigure(Sheet{Axis: Y, Slice: 0, N: n}, f, turn{pose: Identity}, Lines, Mono)
+	y := renderFigure(Sheet{Axis: Y, Slice: 0, N: n}, f, turn{pose: Identity}, Lines, Mono, nil)
 	for _, c := range y.Cells {
 		if c.Ch != 0 {
 			t.Fatalf("y sheet 0 drew %q, which the line never reaches", c.Ch)
