@@ -1,11 +1,9 @@
-package main
+package lattice
 
 import (
 	"io"
 	"strconv"
 	"strings"
-
-	"github.com/0magnet/lattice"
 )
 
 // screen writes frames to a terminal, sending only the cells that changed
@@ -14,7 +12,7 @@ import (
 type screen struct {
 	out   io.Writer
 	w     strings.Builder
-	prev  lattice.Frame
+	prev  Frame
 	color bool
 }
 
@@ -35,10 +33,10 @@ func (s *screen) leave() error {
 }
 
 // draw writes f where it differs from the last frame.
-func (s *screen) draw(f lattice.Frame) error {
+func (s *screen) draw(f Frame) error {
 	full := s.prev.Cols != f.Cols || s.prev.Rows != f.Rows
 	cr, cc := -1, -1 // where the cursor is, if known
-	var last lattice.Cell
+	var last Cell
 	haveColor := false
 	for r := range f.Rows {
 		for c := range f.Cols {
@@ -68,12 +66,12 @@ func (s *screen) draw(f lattice.Frame) error {
 }
 
 // sgr is the escape that sets a cell's color.
-func sgr(c lattice.Cell) string {
+func sgr(c Cell) string {
 	return "\x1b[38;2;" + strconv.Itoa(int(c.R)) + ";" + strconv.Itoa(int(c.G)) + ";" + strconv.Itoa(int(c.B)) + "m"
 }
 
 // plain writes f as lines of text, colored or not, for -once.
-func plain(w io.Writer, f lattice.Frame, color bool) error {
+func plain(w io.Writer, f Frame, color bool) error {
 	var bw strings.Builder
 	for r := range f.Rows {
 		end := f.Cols

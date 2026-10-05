@@ -69,6 +69,26 @@ colored by where it is, so it is the same color in all three.
 Only the cells that changed are sent, so a mostly still, mostly empty sheet
 costs almost nothing to keep on screen.
 
+## As a library
+
+The command is `lattice.Program`, so a host that keeps its own terminals can
+run it in them frame by frame: the same flags, writing the same bytes.
+
+```go
+p, err := lattice.NewProgram([]string{"-axis", "y", "-slice", "3"}, os.Stderr)
+if err != nil {
+	return err
+}
+p.Enter(term)            // term: any io.Writer a terminal reads
+for t := range frames {
+	p.Frame(t)            // the solid as it stands at t
+}
+p.Leave()
+```
+
+`Sheet`, `BasisOf` and `Render` are the geometry underneath it, for a host
+that places the sheets in space.
+
 ## Across many terminals
 
 Every sheet of every axis, each in a tmux window of its own:
@@ -103,12 +123,12 @@ gocloc --not-match-d='(vendor|node_modules|\.git)' .
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Go                               7             71            124            648
+Go                               8             79            139            718
+Markdown                         1             29              0            105
 YAML                             1              0              7             98
 Makefile                         1             19             34             89
-Markdown                         1             18              0             66
 Bourne Shell                     1              8             16             30
 -------------------------------------------------------------------------------
-TOTAL                           11            116            181            931
+TOTAL                           12            135            196           1040
 -------------------------------------------------------------------------------
 ```
