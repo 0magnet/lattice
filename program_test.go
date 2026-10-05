@@ -129,3 +129,38 @@ func TestAStillSolidIsNotRedrawn(t *testing.T) {
 		t.Errorf("a still solid was drawn again")
 	}
 }
+
+// Without -n the terminal's size is the resolution: its rows, or half its
+// columns if fewer, and the middle slice follows it. -n pins it, and a slice
+// given outright is kept within whatever the resolution becomes.
+func TestTheTerminalSetsTheResolution(t *testing.T) {
+	p, err := NewProgram([]string{"-axis", "y"}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.Resize(80, 24)
+	if s := p.Sheet(); s.N != 24 || s.Slice != 12 {
+		t.Errorf("80x24: %+v, want n 24, slice 12", s)
+	}
+	p.Resize(30, 24) // narrow: half the columns is fewer
+	if s := p.Sheet(); s.N != 15 || s.Slice != 7 {
+		t.Errorf("30x24: %+v, want n 15, slice 7", s)
+	}
+	q, err := NewProgram([]string{"-slice", "20"}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	q.Resize(200, 50)
+	q.Resize(40, 10)
+	if s := q.Sheet(); s.N != 10 || s.Slice != 9 {
+		t.Errorf("slice 20 at 40x10: %+v, want n 10, slice 9", s)
+	}
+	r, err := NewProgram([]string{"-n", "8"}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.Resize(200, 50)
+	if r.Sheet().N != 8 {
+		t.Errorf("-n 8 was resized to %d", r.Sheet().N)
+	}
+}

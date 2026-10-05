@@ -70,6 +70,13 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
+	// The terminal's size is the resolution, unless -n says otherwise.
+	size := func() {
+		if w, h, err := term.GetSize(int(os.Stdout.Fd())); err == nil { //nolint:gosec // a file descriptor fits an int
+			p.Resize(w, h)
+		}
+	}
+	size()
 	if p.Once() {
 		return p.Print(os.Stdout, time.Now())
 	}
@@ -81,6 +88,8 @@ func run(args []string) error {
 	defer p.Leave() //nolint:errcheck // the terminal is going away either way
 	keys, restore := readKeys(ctx)
 	defer restore()
+	resized, unwatch := winch()
+	defer unwatch()
 	tick := time.NewTicker(p.Interval())
 	defer tick.Stop()
 	for {
@@ -90,6 +99,8 @@ func run(args []string) error {
 		select {
 		case <-ctx.Done():
 			return nil
+		case <-resized:
+			size()
 		case b := <-keys:
 			if p.Input(b) {
 				return nil

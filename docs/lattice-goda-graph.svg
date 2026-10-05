@@ -12,20 +12,20 @@
 <!-- github.com/0magnet/lattice -->
 <g id="node1" class="node">
 <title>github.com/0magnet/lattice</title>
-<g id="a_node1"><a xlink:href="https://pkg.go.dev/github.com/0magnet/lattice" xlink:title="github.com/0magnet/lattice\l764 / 24.7KB\l" target="_graphviz">
+<g id="a_node1"><a xlink:href="https://pkg.go.dev/github.com/0magnet/lattice" xlink:title="github.com/0magnet/lattice\l795 / 25.9KB\l" target="_graphviz">
 <polygon fill="none" stroke="#1f0791" stroke-width="2" stroke-opacity="0.698039" points="504,-36 324,-36 324,0 504,0 504,-36"/>
 <text xml:space="preserve" text-anchor="start" x="332" y="-21.25" font-family="Times,serif" font-size="10.00">github.com/0magnet/lattice</text>
-<text xml:space="preserve" text-anchor="start" x="332" y="-8.5" font-family="Times,serif" font-size="10.00">764 / 24.7KB</text>
+<text xml:space="preserve" text-anchor="start" x="332" y="-8.5" font-family="Times,serif" font-size="10.00">795 / 25.9KB</text>
 </a>
 </g>
 </g>
 <!-- github.com/0magnet/lattice/cmd/lattice -->
 <g id="node2" class="node">
 <title>github.com/0magnet/lattice/cmd/lattice</title>
-<g id="a_node2"><a xlink:href="https://pkg.go.dev/github.com/0magnet/lattice/cmd/lattice" xlink:title="github.com/0magnet/lattice/cmd/lattice\l95 / 2.5KB\l" target="_graphviz">
+<g id="a_node2"><a xlink:href="https://pkg.go.dev/github.com/0magnet/lattice/cmd/lattice" xlink:title="github.com/0magnet/lattice/cmd/lattice\l119 / 3.1KB\l" target="_graphviz">
 <polygon fill="none" stroke="#910747" stroke-width="2" stroke-opacity="0.698039" points="216,-36 0,-36 0,0 216,0 216,-36"/>
 <text xml:space="preserve" text-anchor="start" x="8" y="-21.25" font-family="Times,serif" font-size="10.00">github.com/0magnet/lattice/cmd/lattice</text>
-<text xml:space="preserve" text-anchor="start" x="8" y="-8.5" font-family="Times,serif" font-size="10.00">95 / 2.5KB</text>
+<text xml:space="preserve" text-anchor="start" x="8" y="-8.5" font-family="Times,serif" font-size="10.00">119 / 3.1KB</text>
 </a>
 </g>
 </g>
