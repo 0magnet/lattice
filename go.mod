@@ -3,7 +3,7 @@ module github.com/0magnet/lattice
 go 1.26.4
 
 require (
-	github.com/0magnet/calvin v0.0.1-0.20261013200157-9f68c20a964b
+	github.com/0magnet/calvin v0.0.1-0.20261013221715-da6581155df3
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/term v0.47.0
