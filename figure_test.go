@@ -121,3 +121,39 @@ func BenchmarkFigureVoxels(b *testing.B) {
 		f.voxels(24, turn{pose: Identity})
 	}
 }
+
+// TestAColoredFigureIsDrawnInItsColors: a host that colors its figure (a
+// trajectory by height, say) draws it in those colors, a segment running from
+// one end's color to the other's; one that does not keeps the volume's.
+func TestAColoredFigureIsDrawnInItsColors(t *testing.T) {
+	const n = 9
+	red, blue := RGB{255, 0, 0}, RGB{0, 0, 255}
+	line := []Vec3{{-0.9, 0, 0}, {0.9, 0, 0}} // across the middle Z sheet
+	sh := Sheet{Axis: Z, Slice: n / 2, N: n}
+	var f Figure
+	f.SetColored([][]Vec3{line}, [][]RGB{{red, blue}})
+	fr := renderFigure(sh, &f, turn{pose: Identity}, Lines, ByPosition, nil)
+	row := fr.Cells[(n/2)*fr.Cols : (n/2+1)*fr.Cols]
+	first, last := -1, -1
+	for i, c := range row {
+		if c.Ch != 0 && c.Ch != ' ' {
+			if first < 0 {
+				first = i
+			}
+			last = i
+		}
+	}
+	if first < 0 {
+		t.Fatal("the line drew nothing")
+	}
+	if a, b := row[first], row[last]; !(a.R > a.B && b.B > b.R) {
+		t.Errorf("the line runs %v,%v,%v to %v,%v,%v; want red to blue", a.R, a.G, a.B, b.R, b.G, b.B)
+	}
+	// Uncolored, the same line is the volume's colors, as before.
+	f.Set([][]Vec3{line})
+	fr = renderFigure(sh, &f, turn{pose: Identity}, Lines, ByPosition, nil)
+	c := fr.Cells[(n/2)*fr.Cols+first]
+	if r, g, b := color(sh.Voxel(first/2, n/2), ByPosition); c.R != r || c.G != g || c.B != b {
+		t.Errorf("an uncolored figure is %v,%v,%v where the volume is %v,%v,%v", c.R, c.G, c.B, r, g, b)
+	}
+}
