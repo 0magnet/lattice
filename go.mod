@@ -6,7 +6,7 @@ require (
 	github.com/0magnet/calvin v0.0.1-0.20261109140133-887794fc87eb
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.1.0
-	golang.org/x/term v0.47.0
+	golang.org/x/term v0.48.0
 )
 
 require (
